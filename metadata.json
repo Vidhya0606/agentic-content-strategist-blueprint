@@ -1,0 +1,6 @@
+{
+  "name": "Agentic Content Idea Generator",
+  "description": "An autonomous AI content strategist that performs audience analysis, search intent mapping, gap analysis, and scores content opportunities for blog, LinkedIn, and newsletter formats.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
