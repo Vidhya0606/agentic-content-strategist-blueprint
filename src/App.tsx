@@ -120,6 +120,29 @@ export default function App() {
         const newReport: StrategyReport = data.report;
         setReport(newReport);
 
+        try {
+          const slugifiedTopic = formData.topic.toLowerCase().replace(/\s+/g, "-");
+          const blueprintId = `${Date.now()}-${slugifiedTopic}`;
+          await fetch("/api/history/save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              blueprint: {
+                id: blueprintId,
+                date: new Date().toISOString(),
+                topic: formData.topic,
+                industry: formData.industry,
+                audience: formData.audience,
+                goal: formData.contentGoal,
+                topIdea: newReport.prioritizedOpportunities?.[0]?.title || "",
+                executionStatus: "Draft"
+              }
+            })
+          });
+        } catch (err) {
+          console.error("Failed to save blueprint history:", err);
+        }
+
         const newSaved: SavedStrategy = {
           id: `scr-${Date.now()}`,
           timestamp: new Date().toLocaleDateString("en-US", {
@@ -567,7 +590,7 @@ ${report.executionBrief.keyTalkingPoints.map(t => `- ${t}`).join("\n")}`;
                 {isChatLoading && (
                   <div className="bg-black/40 border border-zinc-900 p-3 rounded-lg mr-4 text-zinc-400 italic flex items-center gap-2">
                     <div className="animate-spin w-3.5 h-3.5 border-2 border-[#C5A267] border-t-transparent rounded-full" />
-                    <span>Strategist core thinking concepts...</span>
+                    <span>text-zinc-400 italic flex items-center gap-2</span>
                   </div>
                 )}
               </div>
@@ -691,66 +714,6 @@ ${report.executionBrief.keyTalkingPoints.map(t => `- ${t}`).join("\n")}`;
                   </div>
                 </section>
 
-                {/* STEP 3 & Gap Analysis */}
-                <section id="step3-editorial-critique" className="bg-zinc-900/20 border border-white/5 p-5 rounded-2xl">
-                  <div className="flex justify-between items-center border-b border-zinc-800 pb-3 mb-4">
-                    <h2 className="text-[10px] uppercase tracking-[0.2em] text-[#C5A267] font-mono font-semibold">
-                      Step 03 / Consensus Gap Critique
-                    </h2>
-                    <span className="text-[9px] bg-amber-950 text-[#C5A267] border border-[#C5A267]/10 px-2 py-0.5 rounded font-mono">
-                      Landscape analysis
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <div className="bg-black/50 p-3.5 rounded-lg border-l-2 border-[#C5A267]">
-                        <p className="text-[10px] font-mono uppercase text-[#C5A267] mb-1 font-bold">Missing Conversations</p>
-                        <ul className="space-y-1 text-xs text-zinc-300">
-                          {report.editorialGapAnalysis.missingConversations.map((c, i) => (
-                            <li key={i} className="leading-relaxed font-sans">• {c}</li>
-                          ))}
-                        </ul>
-                      </div>
-                      
-                      <div className="bg-black/50 p-3.5 rounded-lg border-l-2 border-red-500/60">
-                        <p className="text-[10px] font-mono uppercase text-red-400 mb-1 font-bold">Saturated / Cliché Formats (Avoid Raw)</p>
-                        <ul className="space-y-1 text-xs text-zinc-400 italic">
-                          {report.editorialGapAnalysis.saturatedIdeas.map((s, i) => (
-                            <li key={i} className="leading-relaxed">• {s}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col justify-between space-y-4">
-                      <div className="bg-zinc-950 p-4 rounded-lg border border-white/5">
-                        <span className="text-[9px] font-mono uppercase tracking-wider text-zinc-500 block mb-1">
-                          Strategic Editorial Thesis
-                        </span>
-                        <p className="text-xs text-zinc-300 leading-relaxed font-serif italic font-medium">
-                          "{report.editorialGapAnalysis.summary}"
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3 text-[11px]">
-                        <div className="bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/60">
-                          <span className="text-[9px] font-mono text-[#C5A267] font-bold uppercase block mb-1">Counterintuitive Views</span>
-                          <p className="text-zinc-400 leading-tight">
-                            {report.editorialGapAnalysis.counterintuitiveInsights[0] || "Diverge from vanilla opinions"}
-                          </p>
-                        </div>
-                        <div className="bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/60">
-                          <span className="text-[9px] font-mono text-zinc-400 font-bold uppercase block mb-1">Underserved Gaps</span>
-                          <p className="text-zinc-400 leading-tight">
-                            {report.editorialGapAnalysis.underservedQuestions[0] || "Examine technical complexities"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
                 {/* STEP 2: Intent Vector Mapping Section (Exactly 20 Vectors list) */}
                 <section id="step2-search-vectors" className="bg-zinc-900/40 border border-white/5 p-5 rounded-2xl">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4 mb-4">
@@ -835,6 +798,66 @@ ${report.executionBrief.keyTalkingPoints.map(t => `- ${t}`).join("\n")}`;
                           </div>
                         );
                       })}
+                  </div>
+                </section>
+
+                {/* STEP 3 & Gap Analysis */}
+                <section id="step3-editorial-critique" className="bg-zinc-900/20 border border-white/5 p-5 rounded-2xl">
+                  <div className="flex justify-between items-center border-b border-zinc-800 pb-3 mb-4">
+                    <h2 className="text-[10px] uppercase tracking-[0.2em] text-[#C5A267] font-mono font-semibold">
+                      Step 03 / Consensus Gap Critique
+                    </h2>
+                    <span className="text-[9px] bg-amber-950 text-[#C5A267] border border-[#C5A267]/10 px-2 py-0.5 rounded font-mono">
+                      Landscape analysis
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <div className="bg-black/50 p-3.5 rounded-lg border-l-2 border-[#C5A267]">
+                        <p className="text-[10px] font-mono uppercase text-[#C5A267] mb-1 font-bold">Missing Conversations</p>
+                        <ul className="space-y-1 text-xs text-zinc-300">
+                          {report.editorialGapAnalysis.missingConversations.map((c, i) => (
+                            <li key={i} className="leading-relaxed font-sans">• {c}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      
+                      <div className="bg-black/50 p-3.5 rounded-lg border-l-2 border-red-500/60">
+                        <p className="text-[10px] font-mono uppercase text-red-400 mb-1 font-bold">Saturated / Cliché Formats (Avoid Raw)</p>
+                        <ul className="space-y-1 text-xs text-zinc-400 italic">
+                          {report.editorialGapAnalysis.saturatedIdeas.map((s, i) => (
+                            <li key={i} className="leading-relaxed">• {s}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col justify-between space-y-4">
+                      <div className="bg-zinc-950 p-4 rounded-lg border border-white/5">
+                        <span className="text-[9px] font-mono uppercase tracking-wider text-zinc-500 block mb-1">
+                          Strategic Editorial Thesis
+                        </span>
+                        <p className="text-xs text-zinc-300 leading-relaxed font-serif italic font-medium">
+                          "{report.editorialGapAnalysis.summary}"
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 text-[11px]">
+                        <div className="bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/60">
+                          <span className="text-[9px] font-mono text-[#C5A267] font-bold uppercase block mb-1">Counterintuitive Views</span>
+                          <p className="text-zinc-400 leading-tight">
+                            {report.editorialGapAnalysis.counterintuitiveInsights[0] || "Diverge from vanilla opinions"}
+                          </p>
+                        </div>
+                        <div className="bg-zinc-900/40 p-3 rounded-lg border border-zinc-800/60">
+                          <span className="text-[9px] font-mono text-zinc-400 font-bold uppercase block mb-1">Underserved Gaps</span>
+                          <p className="text-zinc-400 leading-tight">
+                            {report.editorialGapAnalysis.underservedQuestions[0] || "Examine technical complexities"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </section>
 
@@ -1111,11 +1134,11 @@ ${report.executionBrief.keyTalkingPoints.map(t => `- ${t}`).join("\n")}`;
                           <div className="flex md:flex-col gap-2 shrink-0">
                             <button
                               onClick={() => {
-                                if (completedPriorities.includes(opp.ideaId)) {
-                                  setCompletedPriorities(completedPriorities.filter(id => id !== opp.ideaId));
-                                } else {
-                                  setCompletedPriorities([...completedPriorities, opp.ideaId]);
-                                }
+                                  if (completedPriorities.includes(opp.ideaId)) {
+                                    setCompletedPriorities(completedPriorities.filter(id => id !== opp.ideaId));
+                                  } else {
+                                    setCompletedPriorities([...completedPriorities, opp.ideaId]);
+                                  }
                               }}
                               className={`px-3 py-1.5 text-[9px] uppercase tracking-wider font-mono rounded-lg border font-semibold flex items-center gap-1.5 cursor-pointer ${
                                 isBookmarked 
